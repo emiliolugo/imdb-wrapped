@@ -4,7 +4,8 @@ import ChartPage from './components/Chart';
 import DashPage from './components/Dash';
 import '@mantine/core/styles.css';
 import { MantineProvider } from '@mantine/core';
-import { motion, easeInOut } from 'motion';
+import { motion } from 'motion/react'
+import { easeInOut } from 'motion';
 import DifferingOpinionsPage from './components/DiffOpinions';
 
 function App() {
