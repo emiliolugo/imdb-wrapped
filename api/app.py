@@ -17,7 +17,7 @@ def convert_np(obj):
     return obj
     
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": ["http://127.0.0.1:5173", "https://imdb-wrapped.vercel.app/"]}})
+CORS(app, support_credentials=True)
 
 @app.before_request
 def log_request():
