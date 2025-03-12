@@ -3,7 +3,7 @@ import './App.css';
 import ChartPage from './components/Chart';
 import DashPage from './components/Dash';
 import '@mantine/core/styles.css';
-import { motion } from "motion/react";
+import { motion } from "motion";
 import { MantineProvider } from '@mantine/core';
 import DifferingOpinionsPage from './components/DiffOpinions';
 import { easeInOut } from 'motion';
