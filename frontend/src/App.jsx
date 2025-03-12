@@ -3,10 +3,10 @@ import './App.css';
 import ChartPage from './components/Chart';
 import DashPage from './components/Dash';
 import '@mantine/core/styles.css';
-import { motion } from "motion";
+import { motion } from '@motionone/react';
 import { MantineProvider } from '@mantine/core';
-import DifferingOpinionsPage from './components/DiffOpinions';
 import { easeInOut } from 'motion';
+import DifferingOpinionsPage from './components/DiffOpinions';
 
 function App() {
   const [file, setFile] = useState(null);
