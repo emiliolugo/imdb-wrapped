@@ -74,7 +74,7 @@ function App() {
     formData.append('file', file);
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/upload-file', {
+      const response = await fetch('/api/upload-file', {
         method: 'POST',
         body: formData,
         headers: {
@@ -123,14 +123,14 @@ function App() {
               Your Favorite Films.<br /> Your Cut.
             </h1>
             <form onSubmit={handleSubmit}>
-              <div className='w-[30vw] mx-auto'>
+              <div className=' mx-auto'>
               <motion.div
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleFileDrop}
                 className={`
                   relative m-5 sm:m-20 text-center border border-2 
-                  p-5  mx-30 rounded-lg border-[#d4d4dc] text-[#d4d4dc]
+                  p-5 rounded-lg border-[#d4d4dc] text-[#d4d4dc]
                   transition-all duration-1000
                 `}
               >

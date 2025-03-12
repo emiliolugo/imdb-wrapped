@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify, json
-from flask.json.provider import DefaultJSONProvider
 from flask_cors import CORS
 import os
 import tempfile
@@ -18,8 +17,9 @@ def convert_np(obj):
     return obj
     
 app = Flask(__name__)
-# Set the custom JSON provider so jsonify uses it
-CORS(app)
+@app.before_request
+def log_request():
+    print(f"Received {request.method} request for {request.path}")
 
 @app.route('/upload-file', methods=['POST'])
 def analyze_route():
@@ -52,5 +52,4 @@ def analyze_route():
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+
