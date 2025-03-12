@@ -1,18 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './App.css';
 import ChartPage from './components/Chart';
 import DashPage from './components/Dash';
 import '@mantine/core/styles.css';
-
+import { motion } from "motion/react";
 import { MantineProvider } from '@mantine/core';
 import DifferingOpinionsPage from './components/DiffOpinions';
+import { easeInOut } from 'motion';
 
 function App() {
   const [file, setFile] = useState(null);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  
+  const refArray = [useRef(), useRef(), useRef(), useRef()];
+  const [isChartInViewOne, setIsChartInViewOne] = useState(false);
+
+  const handleChartInViewOneFunc = () => {
+    setIsChartInViewOne(true);
+  };
+
   // New states in camelCase
   const [individualGenres, setIndividualGenres] = useState(null);
   const [averageDifference, setAverageDifference] = useState(null);
@@ -34,14 +41,24 @@ function App() {
     }
   };
 
+  const [isDragging, setIsDragging] = useState(false);
+
   const handleDragOver = (event) => {
     event.preventDefault();
+    if (!isDragging) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
   };
 
   const handleFileChange = (event) => {
     if (event.target.files && event.target.files.length > 0) {
       setFile(event.target.files[0]);
     }
+    setIsDragging(false);
   };
 
   const handleSubmit = async (event) => {
@@ -50,7 +67,6 @@ function App() {
       setError("Please select a file.");
       return;
     }
-    console.log(file);
     setError(null);
     setLoading(true);
 
@@ -65,13 +81,11 @@ function App() {
           'Accept': 'application/json',
         },
       });
-      console.log(formData);
 
       const data = await response.json();
       // Convert the data into an array of key-value pairs
       const resultArray = Object.entries(data).map(([key, value]) => ({ key, value }));
       setResult(resultArray);
-      console.log(JSON.stringify(resultArray, null, 2));
     } catch (err) {
       setError("Error submitting file.");
     } finally {
@@ -79,7 +93,6 @@ function App() {
     }
   };
 
-  // Extract each value from result and set corresponding state in camelCase
   useEffect(() => {
     if (result) {
       const getValueForKey = (key) => {
@@ -102,66 +115,120 @@ function App() {
   }, [result]);
 
   return (
-    <MantineProvider withGlobalStyles withNormalizeCSS>
-      <div className="App">
-        <h1>Your Movie Stats: Wrapped</h1>
-        
-        {/* Only show the file upload form if the file hasn't been successfully uploaded */}
+    <MantineProvider className="bg-[#393f4d]">
+      <div className="bg-[#393f4d] w-screen min-h-screen flex flex-col items-center">
         {!result && (
-          <form onSubmit={handleSubmit}>
-            <div
-              onDragOver={handleDragOver}
-              onDrop={handleFileDrop}
-              style={{
-                border: '2px dashed #ccc',
-                borderRadius: '20px',
-                padding: '20px',
-                textAlign: 'center',
-                marginBottom: '20px',
-                position: 'relative'
-              }}
-            >
-              {file ? (
-                <p>File Uploaded!</p>
-              ) : (
-                <p>Drag and drop a CSV file here, or click to select one.</p>
-              )}
-              {/* Invisible file input over the drop zone */}
-              <input
-                type="file"
-                accept=".csv"
-                onChange={handleFileChange}
+          <div className='mt-20 sm:mt-60 p-5 sm:p-20 w-screen text-center bg-[#393f4d]'>
+            <h1 className='font-7xl font-black text-[#d4d4dc]'>
+              Your Favorite Films.<br /> Your Cut.
+            </h1>
+            <form onSubmit={handleSubmit}>
+              <div className='w-[30vw] mx-auto'>
+              <motion.div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleFileDrop}
+                className={`
+                  relative m-5 sm:m-20 text-center border border-2 
+                  p-5  mx-30 rounded-lg border-[#d4d4dc] text-[#d4d4dc]
+                  transition-all duration-1000
+                `}
+              >
+                {file ? (
+                  <p>File Uploaded!</p>
+                ) : (
+                  <p>Drag and drop your IMDb CSV file here, or click to select one.</p>
+                )}
+                <input
+                  type="file"
+                  accept=".csv"
+                  onChange={handleFileChange}
+                  style={{
+                    opacity: 0,
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    cursor: 'pointer'
+                  }}
+                />
+              </motion.div>
+              </div>
+              <motion.button
+                type="submit"
+                className="mt-3"
                 style={{
-                  opacity: 0,
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  height: '100%',
-                  cursor: 'pointer'
+                  color: "#d4d4dc",
+                  border: "solid",
+                  backgroundColor: "transparent"
                 }}
-              />
-            </div>
-            <button type="submit">Submit</button>
-          </form>
-        )}
-
-        {loading && <p>Loading...</p>}
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-        
-        {/* You can now use the individual state values to build your components */}
-        {individualGenres && (
-          <div>
-            <DashPage averageRatings={averageRatings} totalWatchTime={totalWatchTime} />
-            <ChartPage chartData={individualGenres} title={"Your Genres Ranked"} />
-            <ChartPage chartData={yourRatings} title={"Your Ratings"} />
-            <ChartPage chartData={imdbRatings} title={"IMDb's Ratings"} />
-            <ChartPage chartData={topDirectors} title={"Your Top 5 Directors"} />
-
-            <DifferingOpinionsPage differingOpinions={differingOpinions} />
+                whileHover={{
+                  scale: 1.1,
+                  backgroundColor: "#d4d4dc",
+                  color: "#393f4d",
+                  border: "solid",
+                  borderColor: "#d4d4dc"
+                }}
+              >
+                Submit
+              </motion.button>
+            </form>
           </div>
         )}
-        {/* Repeat similar rendering for other state variables as needed */}
+        {individualGenres && (
+          <div className='bg-[#393f4d] w-full'>
+            <motion.div
+              animate={{ translateY: -20, opacity: 1 }}
+              transition={{ duration: 0.5, ease: easeInOut }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, amount: 0.5 }}
+              className='h-screen flex items-center justify-center'
+            >
+              <h1 className='text-center font-black text-[#d4d4dc]'>Your Stats are Ready.</h1>
+            </motion.div>
+            <motion.div
+              ref={refArray[0]}
+              animate={{ translateY: -20, opacity: 1 }}
+              transition={{ duration: 0.5, ease: easeInOut }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true, amount: 0.5 }}
+              className='flex items-center justify-center'
+            >
+              <DashPage averageRatings={averageRatings} totalWatchTime={totalWatchTime} />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              onViewportEnter={handleChartInViewOneFunc}
+              transition={{ duration: 0.5, ease: easeInOut }}
+              className='flex flex-col lg:flex-row h-auto lg:h-screen items-center justify-center'
+            >
+              <ChartPage chartData={individualGenres} title={"Your Favorite Genres"} isChartInView={isChartInViewOne} />
+              <ChartPage chartData={topDirectors} title={"Your Top 5 Directors"} isChartInView={isChartInViewOne} />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ duration: 0.5, ease: easeInOut }}
+              className='flex flex-col lg:flex-row h-auto lg:h-screen items-center justify-center'
+            >
+              <ChartPage chartData={yourRatings} title={"Your Ratings"} isChartInView={isChartInViewOne} />
+              <ChartPage chartData={imdbRatings} title={"IMDb's Ratings"} isChartInView={isChartInViewOne} />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={{ duration: 0.5, ease: easeInOut }}
+              className='md:h-screen h-auto'
+            >
+              <DifferingOpinionsPage differingOpinions={differingOpinions} />
+            </motion.div>
+          </div>
+        )}
       </div>
     </MantineProvider>
   );
