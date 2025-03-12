@@ -74,7 +74,8 @@ function App() {
     formData.append('file', file);
 
     try {
-      const response = await fetch('/api/upload-file', {
+  
+      const response = await fetch('https://imdb-wrapped-backend.onrender.com/upload-file', {
         method: 'POST',
         body: formData,
         headers: {
