@@ -13,12 +13,11 @@ export default function NumberColor({value , version}){
         if(version!==3){
             let clampedValue = value;
             if(version==4){
-                if(value < 4){
-                    clampedValue = Math.max((value+5)/2,4)
+                if(value < 0){
+                    return `rgb(255, 0, 0)`;
                 }
-                else{
-                    clampedValue = Math.min((value+5)/2,5)
-
+                else if(value > 0){
+                    return `rgb(0, 255, 0)`;
                 }
             }
             else{
@@ -55,17 +54,28 @@ export default function NumberColor({value , version}){
 
     return(
         <div className="flex items-center gap-x-1 justify-center">
-        <p
+            {version!==4&&
+            <p
             style={{ 
                 color: getColor(value), 
             }}
-            className="text-xl font-semibold"
+            className="font-semibold"
             >
-                {value}
-        </p>        
+                {Math.abs(value)}
+        </p>    }
+            
         {version===4&&
-        <p>
+        <>
+        <p
+        style={{ 
+            color: getColor(value), 
+        }}
+        className="font-semibold"
+        >
+            {Math.abs(value)}
+    </p>
+        <p className="text-[#393f4d]">
         {getText(value)}
-        </p>}
+        </p></>}
         </div>
     )}
